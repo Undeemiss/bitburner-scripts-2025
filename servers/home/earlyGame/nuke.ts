@@ -22,6 +22,9 @@ export async function main(ns: NS) {
         try {
             ns.brutessh(host);
             ns.ftpcrack(host);
+            ns.relaysmtp(host);
+            ns.httpworm(host);
+            ns.sqlinject(host);
         } catch (e) {
 
         }

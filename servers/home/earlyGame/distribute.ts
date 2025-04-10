@@ -5,6 +5,7 @@ import { AutocompleteData } from "@/NetscriptDefinitions";
 export async function main(ns: NS) {
     const hosts = getHosts(ns);
     const toDistribute: string = <string>ns.args[0];
+    ns.args.shift();
 
     for (const host of hosts) {
         const server = ns.getServer(host);
@@ -12,7 +13,7 @@ export async function main(ns: NS) {
             ns.scp(toDistribute, host);
             const threads = Math.floor((server.maxRam - server.ramUsed) / ns.getScriptRam(toDistribute));
             if (threads > 0) {
-                ns.exec(toDistribute, host, threads);
+                ns.exec(toDistribute, host, threads, ...ns.args);
             }
         }
     }
