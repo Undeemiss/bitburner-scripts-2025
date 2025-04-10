@@ -20,5 +20,5 @@ export async function main(ns: NS) {
 }
 
 export function autocomplete(data: AutocompleteData) {
-    return [...data.servers, '--tail'];
+    return [...data.scripts, ...data.servers, '--tail'];
 }
