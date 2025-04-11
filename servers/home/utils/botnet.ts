@@ -10,8 +10,15 @@ export function getMaxThreads(ns: NS, botnet: Set<string>, ramCost: number) {
     return maxThreads;
 }
 
-// Distribute a large number of threads across a botnet
+// Distribute a large number of threads across a botnet. Returns the number of threads that could not be filled.
 export function execOnBotnet(ns: NS, botnet: Set<string>, filepath: string, threads: number, args: ScriptArg[], temporary: boolean = true) {
+    // Short-circuit and/or error on nonsense operations
+    if (threads == 0) {
+        return 0;
+    } else if (threads < 0) {
+        throw RangeError(`execOnBotnet cannot fulfill ${threads} threads.`);
+    }
+
     // Initialize necessary values
     const ramCost = ns.getScriptRam(filepath, 'home');
     let remainingThreads = threads;
@@ -35,4 +42,5 @@ export function execOnBotnet(ns: NS, botnet: Set<string>, filepath: string, thre
             }
         }
     }
+    return remainingThreads;
 }
