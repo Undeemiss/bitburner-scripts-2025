@@ -22,5 +22,6 @@ export async function main(ns: NS) {
             }
         }
     }
-
+    ns.singularity.connect('home');
+    ns.tprint('Done');
 }
