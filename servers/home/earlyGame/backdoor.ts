@@ -2,6 +2,10 @@ import { getHosts, farConnect } from "../utils/getHosts";
 
 /** @param {NS} ns */
 export async function main(ns: NS) {
+    ns.disableLog('ALL');
+    ns.enableLog('singularity.installBackdoor');
+    ns.ui.openTail();
+
     const hosts = getHosts(ns);
 
     for (const hostname of hosts) {
@@ -10,6 +14,7 @@ export async function main(ns: NS) {
             try {
                 await ns.singularity.installBackdoor();
                 ns.tprint(`Backdoored '${hostname}'`);
+                ns.print(`Backdoored '${hostname}'`);
             } catch (e) { // Stupid error handling
                 try {
                     if (!(e.includes('singularity.installBackdoor: Cannot '))) {
@@ -24,4 +29,5 @@ export async function main(ns: NS) {
     }
     ns.singularity.connect('home');
     ns.tprint('Done');
+    ns.print('Done');
 }

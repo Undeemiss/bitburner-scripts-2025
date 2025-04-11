@@ -1,6 +1,11 @@
+import { AutocompleteData } from "@/NetscriptDefinitions";
+
 /** @param {NS} ns */
 export async function main(ns: NS) {
-    ns.tprint(getHosts(ns));
+    switch (ns.args[0]) {
+        case 'farConnect': farConnect(ns, <string>ns.args[1]); break;
+        default: ns.tprint(getHosts(ns)); break;
+    }
 }
 
 export function getHosts(ns: NS) {
@@ -44,4 +49,8 @@ export function farConnect(ns: NS, hostname: string) {
             throw new Error(`Could not connect to server '${link}' on path to '${hostname}'`);
         }
     }
+}
+
+export function autocomplete(data: AutocompleteData) {
+    return [...data.servers, '--tail', 'farConnect'];
 }
