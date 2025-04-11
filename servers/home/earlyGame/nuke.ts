@@ -1,22 +1,19 @@
+import { getHosts } from "../utils/getHosts";
+
 /** @param {NS} ns */
 export async function main(ns: NS) {
-    ns.ui.openTail();
 
-    const knownHosts = new Set<string>();
-    knownHosts.add("home");
-    const toSearch = ["home"];
+    ns.singularity.purchaseTor();
+    ns.singularity.purchaseProgram('BruteSSH.exe');
+    ns.singularity.purchaseProgram('FTPCrack.exe');
+    ns.singularity.purchaseProgram('relaySMTP.exe');
+    ns.singularity.purchaseProgram('HTTPWorm.exe');
+    ns.singularity.purchaseProgram('SQLInject.exe');
 
-    while (toSearch.length > 0) {
-        const hostname = toSearch.pop();
-        const scanResults = ns.scan(hostname);
-        for (const scannedHost of scanResults) {
-            if (!knownHosts.has(scannedHost)) {
-                toSearch.push(scannedHost);
-            }
-            knownHosts.add(scannedHost);
-        }
-    }
-    ns.print(knownHosts);
+    const knownHosts = getHosts(ns);
+    let total = knownHosts.size;
+    let root = 0;
+    let nuked = 0;
 
     for (const host of knownHosts) {
         try {
@@ -29,9 +26,19 @@ export async function main(ns: NS) {
 
         }
         try {
-            ns.nuke(host);
+            if (ns.hasRootAccess(host)) {
+                root++;
+                // ns.tprint(`.$ ${host}`)
+            } else {
+                ns.nuke(host);
+                root++;
+                nuked++;
+                // ns.tprint(`!$ ${host}`);
+            }
         } catch (e) {
 
         }
     }
+
+    ns.tprint(`\n Nuked ${nuked} new servers. ${root}/${total} controlled.`);
 }
