@@ -103,7 +103,7 @@ async function initialWeaken(ns: NS, targetHostname: string, botnet: Set<string>
                 await ns.sleep(wakeupTimer);
             } else { // Wait until the operation completes if some, but not all, of the threads were fulfilled
                 const sleepTime = sleepBuffer + ns.formulas.hacking.weakenTime(target, player);
-                ns.print(`Waiting for more initial weaken (${returned} / ${weakenThreads})...\n${ns.tFormat(sleepTime)}`);
+                ns.print(`Waiting for more initial weaken (${returned}remaining out of ${weakenThreads} total)...\n${ns.tFormat(sleepTime)}`);
                 await ns.sleep(sleepTime);
             }
         }
@@ -145,7 +145,7 @@ async function initialGrow(ns: NS, targetHostname: string, botnet: Set<string>) 
 
             growThreadsRemaining -= growThreads;
             if (growThreadsRemaining > 0) { // Wait until the operation completes if some, but not all, of the threads were fulfilled
-                ns.print(`Waiting for more initial weaken (${growThreadsRemaining} / ${growThreads})...\n${ns.tFormat(sleepBuffer + weakenTime)}`);
+                ns.print(`Waiting for more initial grow (${growThreadsRemaining} remaining out of ${growThreads} total)...\n${ns.tFormat(sleepBuffer + weakenTime)}`);
                 await ns.sleep(sleepBuffer + weakenTime);
             }
 
