@@ -7,6 +7,8 @@ const wakeupTimer = 10000;
 
 /** @param {NS} ns */
 export async function main(ns: NS) {
+    ns.disableLog('ALL');
+
     // Initialize parameters for the script
     let target = ns.getServer(<string>ns.args[0]);
     let botnet = getHosts(ns);
@@ -62,8 +64,10 @@ async function batch(ns: NS, targetHostname: string, botnet: Set<string>) {
         }
 
         if (batches > 0) {
+            ns.print(`Batching (${batches} batches)...\n${ns.tFormat(sleepBuffer + weakenTime)}`);
             await ns.sleep(sleepBuffer + weakenTime);
         } else {
+            ns.print(`No RAM to Batch! Sleeping...\n${ns.tFormat(wakeupTimer)}`);
             await ns.sleep(wakeupTimer);
         }
     }
@@ -83,7 +87,8 @@ async function initialWeaken(ns: NS, targetHostname: string, botnet: Set<string>
     const weakenEffectiveness = ns.weakenAnalyze(1);
 
     // Weaken until the security is minimized
-    let weakenThreadsRemaining = Math.ceil((target.hackDifficulty - target.minDifficulty) / weakenEffectiveness);
+    const weakenThreads = Math.ceil((target.hackDifficulty - target.minDifficulty) / weakenEffectiveness);
+    let weakenThreadsRemaining = weakenThreads;
     while (weakenThreadsRemaining > 0) {
         // Ensure accurate data for formulas
         target = ns.getServer(targetHostname);
@@ -94,9 +99,12 @@ async function initialWeaken(ns: NS, targetHostname: string, botnet: Set<string>
         // Sleep if more weakening is required
         if (returned > 0) {
             if (returned == weakenThreadsRemaining) { // Wait briefly if no RAM was available
+                ns.print(`No RAM to Weaken! Sleeping...\n${ns.tFormat(wakeupTimer)}`);
                 await ns.sleep(wakeupTimer);
             } else { // Wait until the operation completes if some, but not all, of the threads were fulfilled
-                await ns.sleep(sleepBuffer + ns.formulas.hacking.weakenTime(target, player));
+                const sleepTime = sleepBuffer + ns.formulas.hacking.weakenTime(target, player);
+                ns.print(`Waiting for more initial weaken (${returned} / ${weakenThreads})...\n${ns.tFormat(sleepTime)}`);
+                await ns.sleep(sleepTime);
             }
         }
         weakenThreadsRemaining = returned;
@@ -137,10 +145,12 @@ async function initialGrow(ns: NS, targetHostname: string, botnet: Set<string>) 
 
             growThreadsRemaining -= growThreads;
             if (growThreadsRemaining > 0) { // Wait until the operation completes if some, but not all, of the threads were fulfilled
+                ns.print(`Waiting for more initial weaken (${growThreadsRemaining} / ${growThreads})...\n${ns.tFormat(sleepBuffer + weakenTime)}`);
                 await ns.sleep(sleepBuffer + weakenTime);
             }
 
         } else { // Wait breifly if not enough RAM is available
+            ns.print(`No RAM to Grow! Sleeping...\n${ns.tFormat(wakeupTimer)}`);
             await ns.sleep(wakeupTimer);
         }
     }
