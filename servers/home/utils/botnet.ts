@@ -33,7 +33,10 @@ export function execOnBotnet(ns: NS, botnet: Set<string>, filepath: string, thre
         // Put as many threads as possible on this machine
         if (actualThreads > 0) {
             ns.scp(filepath, hostname, 'home');
-            ns.exec(filepath, hostname, { threads: threads, temporary: temporary }, ...args);
+            const returnValue = ns.exec(filepath, hostname, { threads: actualThreads, temporary: temporary }, ...args);
+            if (returnValue == 0) {
+                throw new Error(`failed ns.exec(${filepath}, ${hostname}, { threads: ${actualThreads}, temporary: ${temporary}}, ...args); with args=${args}`);
+            }
 
             // Keep track of how many threads are left, and short-circuit as applicable.
             remainingThreads -= actualThreads;
