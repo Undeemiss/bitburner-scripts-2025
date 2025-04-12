@@ -1,4 +1,4 @@
-import { AutocompleteData, Server } from "@/NetscriptDefinitions";
+import { AutocompleteData } from "@/NetscriptDefinitions";
 import { getHosts } from "../utils/getHosts";
 import { getMaxThreads, execOnBotnet } from "../utils/botnet";
 
@@ -71,12 +71,6 @@ async function batch(ns: NS, targetHostname: string, botnet: Set<string>) {
     }
 }
 
-function assumeSoftened(server: Server) {
-    const newServer = server;
-    newServer.hackDifficulty = server.minDifficulty;
-    newServer.moneyAvailable = server.moneyMax;
-}
-
 // Prepares a server for batching. Returns once the last operation is started,
 // not when it finishes, enabling extra RAM to be used for batching straight away.
 async function soften(ns: NS, targetHostname: string, botnet: Set<string>) {
@@ -104,10 +98,10 @@ async function initialWeaken(ns: NS, targetHostname: string, botnet: Set<string>
             if (returned == weakenThreadsRemaining) { // Wait briefly if no RAM was available
                 await ns.sleep(wakeupTimer);
             } else { // Wait until the operation completes if some, but not all, of the threads were fulfilled
-                weakenThreadsRemaining = returned;
                 await ns.sleep(sleepBuffer + ns.formulas.hacking.weakenTime(target, player));
             }
         }
+        weakenThreadsRemaining = returned;
     }
 }
 
