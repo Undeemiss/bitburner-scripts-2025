@@ -6,7 +6,6 @@ export async function main(ns: NS) {
     const moneyFactor: number = 0.9
 
     while (true) {
-        ns.print(`${ns.getServerSecurityLevel(hostname)} >= ${ns.getServerMinSecurityLevel(hostname) + weakenAmount}`);
         if (ns.getServerSecurityLevel(hostname) >= ns.getServerMinSecurityLevel(hostname) + weakenAmount) {
             await ns.weaken(hostname);
         } else if (ns.getServerMoneyAvailable(hostname) <= (ns.getServerMaxMoney(hostname) * moneyFactor)) {
