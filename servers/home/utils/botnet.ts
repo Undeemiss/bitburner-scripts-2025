@@ -5,7 +5,9 @@ export function getMaxThreads(ns: NS, botnet: Set<string>, ramCost: number) {
     let maxThreads = 0;
     for (const hostname of botnet) {
         const server = ns.getServer(hostname);
-        maxThreads += Math.floor((server.maxRam - server.ramUsed) / ramCost);
+        if (server.hasAdminRights) {
+            maxThreads += Math.floor((server.maxRam - server.ramUsed) / ramCost);
+        }
     }
     return maxThreads;
 }
@@ -27,6 +29,9 @@ export function execOnBotnet(ns: NS, botnet: Set<string>, filepath: string, thre
     for (const hostname of botnet) {
         // Check how many threads the server can run
         const server = ns.getServer(hostname);
+        if (!(server.hasAdminRights)) {
+            continue;
+        }
         const maxThreads = Math.floor((server.maxRam - server.ramUsed) / ramCost);
         const actualThreads = Math.min(maxThreads, remainingThreads);
 

@@ -21,9 +21,7 @@ async function batch(ns: NS, targetHostname: string, botnet: Set<string>) {
     // Initialize variables
     const weakenEffectiveness = ns.weakenAnalyze(1);
     const weakensPerHack = balanceRatio(weakenEffectiveness);
-    const hackEfficiencyFactor = (1 / (1 + weakensPerHack));
     const weakensPerGrow = 2 * balanceRatio(weakenEffectiveness);
-    const growEfficiencyFactor = (1 / (1 + weakensPerGrow));
 
     while (true) {
         // Get basic server information
@@ -57,7 +55,7 @@ async function batch(ns: NS, targetHostname: string, botnet: Set<string>) {
             failed += execOnBotnet(ns, botnet, 'batching/hack.js', hackThreads, [targetHostname, hackDeltaTime]);
             failed += execOnBotnet(ns, botnet, 'batching/weaken.js', hackWeakens, [targetHostname]);
             failed += execOnBotnet(ns, botnet, 'batching/grow.js', growThreads, [targetHostname, growDeltaTime]);
-            failed += execOnBotnet(ns, botnet, 'batching/weaken.js', hackWeakens, [targetHostname]);
+            failed += execOnBotnet(ns, botnet, 'batching/weaken.js', growWeakens, [targetHostname]);
             if (failed != 0) {
                 throw Error(`Failed to allocate ${failed} requested batching threads.`);
             }
