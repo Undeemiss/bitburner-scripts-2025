@@ -1,5 +1,4 @@
 import { AutocompleteData } from "@/NetscriptDefinitions";
-import { getHosts } from "../utils/getHosts";
 import { getMaxThreads, execOnBotnet } from "../utils/botnet";
 
 const sleepBuffer = 100;
@@ -10,8 +9,9 @@ export async function main(ns: NS) {
     ns.disableLog('ALL');
 
     // Initialize parameters for the script
-    let target = ns.getServer(<string>ns.args[0]);
-    let botnet = getHosts(ns);
+    let target = ns.getServer(<string>ns.args[1]);
+    // let botnet = getHosts(ns);
+    let botnet = new Set<string>([<string>ns.args[0]]);
 
     // Start Batching
     await soften(ns, target.hostname, botnet);
@@ -29,7 +29,7 @@ async function batch(ns: NS, targetHostname: string, botnet: Set<string>) {
         // Get basic server information
         const target = ns.getServer(targetHostname);
         const player = ns.getPlayer();
-        const projectedTarget = target;
+        const projectedTarget = JSON.parse(JSON.stringify(target)); // This makes a deep copy
 
         const threadsAvailable = getMaxThreads(ns, botnet, 1.75);
 
@@ -40,7 +40,7 @@ async function batch(ns: NS, targetHostname: string, botnet: Set<string>) {
         const absMaxHackThreads = Math.ceil(1 / threadHackPercent);
 
         const hackThreads = absMaxHackThreads;
-        projectedTarget.moneyAvailable = Math.max(0, target.moneyMax * (hackThreads * threadHackPercent));
+        projectedTarget.moneyAvailable = Math.max(0, target.moneyMax * (1 - (hackThreads * threadHackPercent)));
         const growThreads = ns.formulas.hacking.growThreads(projectedTarget, player, target.moneyMax);
         const hackWeakens = Math.ceil(hackThreads * weakensPerHack);
         const growWeakens = Math.ceil(growThreads * weakensPerGrow);
