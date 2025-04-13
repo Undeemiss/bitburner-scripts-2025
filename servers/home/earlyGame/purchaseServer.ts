@@ -6,8 +6,8 @@ export async function main(ns: NS) {
     // Print the cost
     ns.tprint(ns.formatNumber(ns.getPurchasedServerCost(size)));
 
-    // If a name was given, but the server
-    if (ns.args[1]) {
-        ns.tprint(ns.purchaseServer(<string>ns.args[1], size));
+    // If a name was given, buy the server
+    for (let i = 0; i < Math.min(ns.getPurchasedServerLimit(), <number>ns.args[1]); i++) {
+        ns.tprint(ns.purchaseServer(`server-${i}`, size));
     }
 }
