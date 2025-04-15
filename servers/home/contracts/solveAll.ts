@@ -6,7 +6,7 @@ type SolverContract = {
     type: string,
     worker?: Worker,
     solution?: any,
-    error?: ErrorEvent,
+    error?: string,
 }
 
 export async function main(ns: NS) {
@@ -115,7 +115,7 @@ async function startWorker(ns: NS, contract: SolverContract) {
         contract.solution = msg.data; // Removed a JSON.stringify() without knowing what it was doing, because it was putting quotes around my output string
     }
     worker.onerror = function (msg) {
-        contract.error = msg;
+        contract.error = msg.message;
     }
 
     //Start the worker

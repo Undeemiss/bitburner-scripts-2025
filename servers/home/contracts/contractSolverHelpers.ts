@@ -730,3 +730,20 @@ export function compressionIRleCompression(data: string) {
 //TODO: compressionIiLzDecompression
 
 //TODO: compressionIiiLzCompression
+
+export function encryptionIiVigenreCipher(data: [string, string]) {
+    const [text, keyword] = data;
+
+    function addLetters(letterOne: string, letterTwo: string) {
+        const numberOne = letterOne.charCodeAt(0) - 'A'.charCodeAt(0);
+        const numberTwo = letterTwo.charCodeAt(0) - 'A'.charCodeAt(0);
+        const sum = (numberOne + numberTwo) % 26;
+        return (String.fromCharCode(sum + 'A'.charCodeAt(0)));
+    }
+
+    let output = '';
+    for(let i=0; i< text.length; i++){
+        output += addLetters(text[i], keyword[i % keyword.length]);
+    }
+    return output;
+}
