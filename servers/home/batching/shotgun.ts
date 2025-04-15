@@ -121,6 +121,7 @@ async function initialGrow(ns: NS, targetHostname: string, botnet: Set<string>) 
 
     // Grow until the server is completely full
     let growThreadsRemaining = ns.formulas.hacking.growThreads(target, player, target.moneyMax);
+    const totalGrowThreads = growThreadsRemaining;
     while (growThreadsRemaining > 0) {
         // Ensure accurate data for formulas
         target = ns.getServer(targetHostname);
@@ -145,7 +146,7 @@ async function initialGrow(ns: NS, targetHostname: string, botnet: Set<string>) 
 
             growThreadsRemaining -= growThreads;
             if (growThreadsRemaining > 0) { // Wait until the operation completes if some, but not all, of the threads were fulfilled
-                ns.print(`Waiting for more initial grow (${growThreadsRemaining} remaining out of ${growThreads} total)...\n${ns.tFormat(sleepBuffer + weakenTime)}`);
+                ns.print(`Waiting for more initial grow (${growThreadsRemaining} remaining out of ${totalGrowThreads} total)...\n${ns.tFormat(sleepBuffer + weakenTime)}`);
                 await ns.sleep(sleepBuffer + weakenTime);
             }
 
