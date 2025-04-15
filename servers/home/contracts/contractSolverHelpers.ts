@@ -221,9 +221,63 @@ export const compressionIRleCompression: CCTSolver<CodingContractName.Compressio
     return outputString;
 }
 
-//TODO: compressionIiLzDecompression
+export const compressionIiLzDecompression: CCTSolver<CodingContractName.CompressionIILZDecompression> = function (data) {
+    let compressedData = data;
+    let uncompressedData = '';
+
+    while (compressedData.length > 0) {
+        // Infinite loop prevention
+        if (isNaN(parseInt(compressedData[0]))) {
+            throw new Error(
+                `compressionIiLzDecompression is in an unrecoverable state: compressedData:${compressedData}, uncompressedData:${uncompressedData}`
+            );
+        }
+
+        { // Mode 1: One digit followed by raw data
+            const l = parseInt(compressedData[0]);
+            uncompressedData += compressedData.slice(1, l + 1);
+            compressedData = compressedData.slice(l + 1);
+        }
+
+        { // Mode 2: Copy from earlier uncompressed data
+            const l = parseInt(compressedData[0]);
+
+            if (l == 0) { // Skip case
+                compressedData = compressedData.slice(1);
+            } else { // Actual data case
+                const x = parseInt(compressedData[1]);
+                for (let i = 0; i < l; i++) {
+                    uncompressedData += uncompressedData[uncompressedData.length - x];
+                }
+                compressedData = compressedData.slice(2);
+            }
+        }
+    }
+    return uncompressedData;
+}
 
 //TODO: compressionIiiLzCompression
+
+export const encryptionICaesarCipher: CCTSolver<CodingContractName.EncryptionICaesarCipher> = function (data) {
+    const [text, key] = data;
+
+    function subtractFromLetter(letter: string, n: number) {
+        const letterAsNumber = letter.charCodeAt(0) - 'A'.charCodeAt(0);
+        // Escape characters that aren't capital letters
+        if (letterAsNumber < 0 || letterAsNumber > 25) {
+            return letter;
+        }
+        const sum = (letterAsNumber + (26 - n)) % 26; //I don't know why actual subtraction didn't work but that's fine
+        return (String.fromCharCode(sum + 'A'.charCodeAt(0)));
+    }
+
+    let output = '';
+    for (let i = 0; i < text.length; i++) {
+        output += subtractFromLetter(text[i], key);
+    }
+    return output;
+
+}
 
 export const encryptionIiVigenreCipher: CCTSolver<CodingContractName.EncryptionIIVigenereCipher> = function (data) {
     const [text, keyword] = data;
