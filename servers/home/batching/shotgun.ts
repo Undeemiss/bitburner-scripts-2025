@@ -39,7 +39,7 @@ async function batch(ns: NS, targetHostname: string, botnet: Set<string>) {
         const threadHackPercent = ns.formulas.hacking.hackPercent(projectedTarget, player)
         const absMaxHackThreads = Math.ceil(1 / threadHackPercent);
 
-        const hackThreads = absMaxHackThreads;
+        const hackThreads = Math.ceil(absMaxHackThreads * 0.01);
         projectedTarget.moneyAvailable = Math.max(0, target.moneyMax * (1 - (hackThreads * threadHackPercent)));
         const growThreads = ns.formulas.hacking.growThreads(projectedTarget, player, target.moneyMax);
         const hackWeakens = Math.ceil(hackThreads * weakensPerHack);
