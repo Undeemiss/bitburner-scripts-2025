@@ -642,8 +642,6 @@ export function findAllValidMathExpressions(input) {
     return validExpressions;
 }
 
-//TODO: hammingcodesIntegerToEncodedBinary
-
 //TODO: hammingcodesEncodedBinaryToInteger
 
 export function proper2coloringOfAGraph(data) {
@@ -742,8 +740,49 @@ export function encryptionIiVigenreCipher(data: [string, string]) {
     }
 
     let output = '';
-    for(let i=0; i< text.length; i++){
+    for (let i = 0; i < text.length; i++) {
         output += addLetters(text[i], keyword[i % keyword.length]);
     }
     return output;
+}
+
+export function hammingcodesIntegerToEncodedBinary(n: number) {
+    function toBinary(n: number) {
+        let remaining = n;
+        let binary = '';
+        while (remaining > 0) {
+            binary = `${remaining % 2}${binary}`;
+            remaining = Math.floor(remaining / 2);
+        }
+        return binary;
+    }
+
+    // Make space in the string for the encoding bits.
+    const normalBinary = toBinary(n);
+    let paddedBinary = `0${normalBinary}`;
+    for (let i = 1; i < normalBinary.length * 2; i *= 2) {
+        // Insert a 0 at location i, shifting everything after to a higher index.
+        paddedBinary = paddedBinary.slice(0, i) + '0' + paddedBinary.slice(i);
+    }
+
+    // Main parity bits.
+    for (let i = 1; i < normalBinary.length * 2; i *= 2) {
+        let parityGroup = 0;
+        for (let j = 0; j < paddedBinary.length; j++) {
+            // Only take values from the parity group
+            if ((j % (i * 2)) >= i) {
+                parityGroup = parityGroup + Number(paddedBinary[j]);
+            }
+        }
+        // Replace the value at location i with the parity bit.
+        paddedBinary = paddedBinary.slice(0, i) + (parityGroup % 2) + paddedBinary.slice(i + 1);
+    }
+
+    // Index 0 parity bit.
+    let parityGroup = 0;
+    for (let i = 1; i < paddedBinary.length; i++) {
+        parityGroup = parityGroup + Number(paddedBinary[i]);
+    }
+    const hammingCode = `${parityGroup % 2}${paddedBinary.slice(1)}`;
+    return hammingCode;
 }
