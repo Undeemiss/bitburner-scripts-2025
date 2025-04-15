@@ -102,10 +102,10 @@ async function startWorker(ns: NS, contract: SolverContract) {
     const code =
         `onmessage = function(msg) {\n` +
         `	console.log("Message received by worker of type ${type}")\n` +
-        `	const soln = ${type}(msg.data);\n` +
+        `   const solve = ${solver};\n` +
+        `	const soln = solve(msg.data);\n` +
         `	postMessage(soln);\n` +
-        `}\n` +
-        `${solver}`;
+        `}\n`;
     const url = blobify(code);
 
     //Create the worker
