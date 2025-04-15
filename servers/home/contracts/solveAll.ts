@@ -71,7 +71,7 @@ export async function main(ns: NS) {
         }
     }
 
-    ns.print(rewards.join(", "));
+    ns.print(`Done. Rewards: ${rewards.join(", ")}`);
 }
 
 //Uses a regex to convert a string to camelCase
