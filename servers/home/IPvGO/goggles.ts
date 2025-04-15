@@ -1,8 +1,12 @@
+import { prettifyBoard } from "./display";
 import { AutocompleteData, GoOpponent } from "@/NetscriptDefinitions";
 type BoardSize = 5 | 7 | 9 | 13;
 
 /** @param {NS} ns */
 export async function main(ns: NS) {
+    ns.disableLog('ALL');
+    ns.ui.openTail();
+
     // Optionally, use the first arg for board size.
     let boardSize: BoardSize = 13;
     if ([5, 7, 9, 13].includes(Number(ns.args[0]))) {
@@ -18,13 +22,13 @@ export async function main(ns: NS) {
     // Rotate through the factions, playing all of them.
     for (let i = 0; true; i = (i + 1) % factions.length) {
         ns.go.resetBoardState(factions[i], boardSize);
-        await playOneGame(ns);
+        await playOneGame(ns, factions[i]);
         await ns.sleep(0);
     }
 
 }
 
-async function playOneGame(ns: NS) {
+async function playOneGame(ns: NS, opponent?: GoOpponent) {
     let result: any, x: number, y: number;
 
     do {
@@ -47,6 +51,9 @@ async function playOneGame(ns: NS) {
 
         // Log opponent's next move, once it happens
         await ns.go.opponentNextTurn();
+
+        // Print the board state
+        ns.print(`Opponent: ${opponent}\n${prettifyBoard(board)}`);
 
         // Keep looping as long as the opponent is playing moves
     } while (result?.type !== "gameOver");
