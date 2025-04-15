@@ -1,5 +1,13 @@
 import { getHosts } from "../utils/getHosts";
 import * as solvers from "./contractSolverHelpers";
+type SolverContract = {
+    host: string,
+    name: string,
+    type: string,
+    worker?: Worker,
+    solution?: any,
+    error?: ErrorEvent,
+}
 
 export async function main(ns: NS) {
     ns.disableLog("ALL");
@@ -7,7 +15,7 @@ export async function main(ns: NS) {
 
     const hosts = getHosts(ns);
 
-    const contracts = [];
+    const contracts: SolverContract[] = [];
     const rewards = [];
 
     //Start a worker for each contract
@@ -19,6 +27,7 @@ export async function main(ns: NS) {
             const contract = {
                 host: hostname,
                 name: contractName,
+                type: ns.codingcontract.getContractType(contractName, hostname),
             };
             try {
                 await startWorker(ns, contract);
@@ -56,7 +65,7 @@ export async function main(ns: NS) {
 
         if (contracts?.length) {
             ns.print(`Pending contracts: ${contracts.map((c) => `${c.name}@${c.host}-${c.type}`).join(", ")}`);
-            await ns.sleep(10000);
+            await ns.sleep(1000);
         } else {
             break;
         }
@@ -82,7 +91,7 @@ function blobify(code) {
     return codeBlobURL;
 }
 
-async function startWorker(ns, contract) {
+async function startWorker(ns: NS, contract: SolverContract) {
     //Get the contract type
     const type = toCamelCase(await ns.codingcontract.getContractType(contract.name, contract.host));
     contract.type = type;
@@ -103,7 +112,7 @@ async function startWorker(ns, contract) {
     const worker = new Worker(url);
     contract.worker = worker;
     worker.onmessage = function (msg) {
-        contract.solution = JSON.stringify(msg.data);
+        contract.solution = msg.data; // Removed a JSON.stringify() without knowing what it was doing, because it was putting quotes around my output string
     }
     worker.onerror = function (msg) {
         contract.error = msg;

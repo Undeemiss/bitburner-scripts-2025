@@ -1,3 +1,5 @@
+import { CodingContractSignatures } from "@/NetscriptDefinitions";
+
 export function findLargestPrimeFactor(n) {
     //Special case for 2
     //While n is divisible by i, divide by i
@@ -694,7 +696,36 @@ export function proper2coloringOfAGraph(data) {
     return coloring;
 }
 
-//TODO: compressionIRleCompression
+export function compressionIRleCompression(data: string) {
+    let outputString = '';
+    let initialChar: string;
+    let runLength = 0;
+
+    // Convert a run of a single character into RLE format, and put it at the end of outputTo.
+    function finalize(char: string, runLength: number) {
+        let outputString = '';
+        let remainingLength = runLength;
+        while (remainingLength >= 1) {
+            const amt = Math.min(remainingLength, 9);
+            remainingLength -= amt;
+            outputString += `${amt}${char}`;
+        }
+        return outputString;
+    }
+
+    for (const char of data) {
+        if (char == initialChar) {
+            runLength++
+        } else {
+            outputString += finalize(initialChar, runLength);
+            initialChar = char;
+            runLength = 1;
+        }
+    }
+    outputString += finalize(initialChar, runLength);
+
+    return outputString;
+}
 
 //TODO: compressionIiLzDecompression
 
