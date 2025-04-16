@@ -8,6 +8,6 @@ export async function main(ns: NS) {
 
     // If a name was given, buy the server
     for (let i = 0; i < Math.min(ns.getPurchasedServerLimit(), <number>ns.args[1]); i++) {
-        ns.tprint(ns.purchaseServer(`server-${i}`, size));
+        ns.tprint(ns.purchaseServer(`server-0`, size));
     }
 }
