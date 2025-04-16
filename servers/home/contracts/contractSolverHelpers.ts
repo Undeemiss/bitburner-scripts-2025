@@ -531,8 +531,6 @@ export const hammingcodesEncodedBinaryToInteger: CCTSolver<CodingContractName.Ha
         }
     }
     const final = toDecimal(strippedBinary);
-
-    // throw new Error("test error");
     return final;
 }
 
