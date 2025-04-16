@@ -197,7 +197,28 @@ export const arrayJumpingGame: CCTSolver<CodingContractName.ArrayJumpingGame> = 
     return 0;
 }
 
-//TODO: arrayJumpingGameIi
+export const arrayJumpingGameIi: CCTSolver<CodingContractName.ArrayJumpingGameII> = function (data) {
+    // Initialize each position except the first as unreachable.
+    const jumpsRequired = [0];
+    for (let i = 1; i < data.length; i++) {
+        jumpsRequired[i] = Infinity;
+    }
+
+    // Iterate through each position.
+    for (let i = 0; i < data.length; i++) {
+        // Mark each of the spaces you can reach from i as reachable in at most one more jump than it takes to get to i
+        for (let j = 1; (j < data[i] + 1) && (i+j < data.length); j++){
+            jumpsRequired[i+j] = Math.min(jumpsRequired[i+j], jumpsRequired[i] + 1);
+        }
+    }
+
+    // Return the jumps to reach the final location
+    const final = jumpsRequired[data.length - 1];
+    if(final < Infinity){
+        return final;
+    }
+    else return 0;
+}
 
 export const compressionIRleCompression: CCTSolver<CodingContractName.CompressionIRLECompression> = function (data) {
     let outputString = '';
@@ -671,7 +692,6 @@ export const sanitizeParenthesesInExpression: CCTSolver<CodingContractName.Sanit
     return filtered;
 }
 
-//TODO: shortestPathInAGrid
 export const shortestPathInAGrid: CCTSolver<CodingContractName.ShortestPathInAGrid> = function (grid) {
     type Tile = [number, number]
     type TilePath = [Tile, string];
