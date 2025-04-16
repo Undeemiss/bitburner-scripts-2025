@@ -5,6 +5,7 @@ type SolverContract = {
     name: string,
     type: string,
     worker?: Worker,
+    solved: boolean,
     solution?: any,
     error?: string,
 }
@@ -28,6 +29,7 @@ export async function main(ns: NS) {
                 host: hostname,
                 name: contractName,
                 type: ns.codingcontract.getContractType(contractName, hostname),
+                solved: false,
             };
             try {
                 await startWorker(ns, contract);
@@ -46,16 +48,16 @@ export async function main(ns: NS) {
             const contract = contracts[i];
             //If an error is thrown, log it
             if (contract?.error) {
-                ns.print(`Error "${contract.error}" thrown by ${contract.name}@${contract.host}, continuing`);
+                ns.print(`Error "${contract.error}" thrown by ${contract.name}@${contract.host}:${contract.type}, continuing`);
                 contracts.splice(i, 1);
             }
             //If a solution is found, submit it
-            if (contract?.solution) {
+            if (contract.solved) {
                 const reward = ns.codingcontract.attempt(
                     contract.solution, contract.name, contract.host
                 );
                 if (reward == "") {
-                    throw `"${contract.solution}" is wrong answer for ${contract.name}@${contract.host}`;
+                    throw `"${contract.solution}" is wrong answer for ${contract.name}@${contract.host}:${contract.type}`;
                 }
                 //Save the reward and delete the now-unnecessary contract object
                 rewards.push(reward);
@@ -112,7 +114,10 @@ async function startWorker(ns: NS, contract: SolverContract) {
     const worker = new Worker(url);
     contract.worker = worker;
     worker.onmessage = function (msg) {
+        console.log('Received solution message from worker');
         contract.solution = msg.data; // Removed a JSON.stringify() without knowing what it was doing, because it was putting quotes around my output string
+        contract.solved = true;
+        console.log(msg);
     }
     worker.onerror = function (msg) {
         contract.error = msg.message;

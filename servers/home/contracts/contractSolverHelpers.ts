@@ -38,7 +38,7 @@ export const algorithmicStockTraderI: CCTSolver<CodingContractName.AlgorithmicSt
     }
 
     var cache = [];
-    for (var i = 0; i < input[0] + 1; i++) {
+    for (var i = 0; i < 2; i++) {
         cache[i] = [];
     }
 
@@ -58,8 +58,14 @@ export const algorithmicStockTraderIi: CCTSolver<CodingContractName.AlgorithmicS
         }
 
         //Use cached value if applicable
-        if (cache[k][startFrom] != undefined) {
-            return cache[k][startFrom];
+        if (k < Infinity) {
+            if (cache[k][startFrom] != undefined) {
+                return cache[k][startFrom];
+            }
+        } else { // Special case for uncapped transactions
+            if (cache[0][startFrom] != undefined) {
+                return cache[0][startFrom];
+            }
         }
 
         var best = 0;
@@ -76,15 +82,18 @@ export const algorithmicStockTraderIi: CCTSolver<CodingContractName.AlgorithmicS
         }
 
         //Cache the value so this calculation is less likely to be repeated
-        cache[k][startFrom] = best;
+        if (k < Infinity) {
+            cache[k][startFrom] = best;
+        } else { // Special case for uncapped transactions
+            cache[0][startFrom] = best;
+        }
 
         return best;
     }
 
+    // Special case for uncapped transactions
     var cache = [];
-    for (var i = 0; i < input[0] + 1; i++) {
-        cache[i] = [];
-    }
+    cache[0] = [];
 
     return possibleProfit(Infinity, input, 0, cache);
 }
@@ -126,7 +135,7 @@ export const algorithmicStockTraderIii: CCTSolver<CodingContractName.Algorithmic
     }
 
     var cache = [];
-    for (var i = 0; i < input[0] + 1; i++) {
+    for (var i = 0; i < 3; i++) {
         cache[i] = [];
     }
 
@@ -663,6 +672,53 @@ export const sanitizeParenthesesInExpression: CCTSolver<CodingContractName.Sanit
 }
 
 //TODO: shortestPathInAGrid
+export const shortestPathInAGrid: CCTSolver<CodingContractName.ShortestPathInAGrid> = function (grid) {
+    type Tile = [number, number]
+    type TilePath = [Tile, string];
+
+    // Because I didn't notice earlier, X is up/down and Y is left/right.
+    function exploreTile(grid: (0 | 1)[][], tilePath: TilePath, livePaths: TilePath[]) {
+        const [[x, y], path] = tilePath;
+        // Explore upwards
+        if (x > 0 && (grid[x - 1][y] == 0)) {
+            grid[x - 1][y] = 1;
+            livePaths.push([[x - 1, y], `${path}U`]);
+        }
+        // Explore downwards
+        if (x < grid.length - 1 && (grid[x + 1][y] == 0)) {
+            grid[x + 1][y] = 1;
+            livePaths.push([[x + 1, y], `${path}D`]);
+        }
+        // Explore leftwards
+        if (y > 0 && (grid[x][y - 1] == 0)) {
+            grid[x][y - 1] = 1;
+            livePaths.push([[x, y - 1], `${path}L`]);
+        }
+        // Explore rightwards
+        if (y < grid[x].length - 1 && (grid[x][y + 1] == 0)) {
+            grid[x][y + 1] = 1;
+            livePaths.push([[x, y + 1], `${path}R`]);
+        }
+    }
+
+    grid[0][0] = 1;
+    const livePaths: TilePath[] = [[[0, 0], '']];
+
+    while (livePaths.length > 0) {
+        const tilePath = livePaths.shift();
+        const [[x, y], path] = tilePath;
+
+        // Check if this tile is the exit
+        if ((x == grid.length - 1) && (y == grid[x].length - 1)) {
+            return path;
+        }
+
+        exploreTile(grid, tilePath, livePaths);
+    }
+
+    // If no path is found, return an empty string.
+    return '';
+}
 
 export const spiralizeMatrix: CCTSolver<CodingContractName.SpiralizeMatrix> = function (matrix) {
     //If the matrix given is empty (base case)
