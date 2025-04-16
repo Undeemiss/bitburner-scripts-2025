@@ -207,14 +207,14 @@ export const arrayJumpingGameIi: CCTSolver<CodingContractName.ArrayJumpingGameII
     // Iterate through each position.
     for (let i = 0; i < data.length; i++) {
         // Mark each of the spaces you can reach from i as reachable in at most one more jump than it takes to get to i
-        for (let j = 1; (j < data[i] + 1) && (i+j < data.length); j++){
-            jumpsRequired[i+j] = Math.min(jumpsRequired[i+j], jumpsRequired[i] + 1);
+        for (let j = 1; (j < data[i] + 1) && (i + j < data.length); j++) {
+            jumpsRequired[i + j] = Math.min(jumpsRequired[i + j], jumpsRequired[i] + 1);
         }
     }
 
     // Return the jumps to reach the final location
     const final = jumpsRequired[data.length - 1];
-    if(final < Infinity){
+    if (final < Infinity) {
         return final;
     }
     else return 0;
@@ -457,7 +457,84 @@ export const generateIpAddresses: CCTSolver<CodingContractName.GenerateIPAddress
     return output;
 }
 
-//TODO: hammingcodesEncodedBinaryToInteger
+export const hammingcodesEncodedBinaryToInteger: CCTSolver<CodingContractName.HammingCodesEncodedBinaryToInteger> = function (hammingCode) {
+    // hammingCode = '1001101010';
+
+    function toBinary(n: number) {
+        let remaining = n;
+        let binary = '';
+        while (remaining > 0) {
+            binary = `${remaining % 2}${binary}`;
+            remaining = Math.floor(remaining / 2);
+        }
+        return binary;
+    }
+
+    // Strictly speaking, this actually converts from a string representing binary to the 'number' type.
+    function toDecimal(bits: string) {
+        let total = 0;
+        for (let i = 0; i < bits.length; i++) {
+            total *= 2;
+            if (bits[i] == '1') {
+                total += 1;
+            }
+        }
+        return total;
+    }
+
+    function bitwiseXor(bitsOne: string, bitsTwo: string) {
+        let resultBits = '';
+        for (let i = 0; i < bitsOne.length; i++) {
+            if (bitsOne[i] == bitsTwo[i]) {
+                resultBits += '0';
+            } else {
+                resultBits += '1';
+            }
+        }
+        return resultBits;
+    }
+
+    function flipBit(bitstring: string, index: number) {
+        let newBitstring = ''
+        for (let i = 0; i < bitstring.length; i++) {
+            if (i == index) {
+                if (bitstring[i] == '0') {
+                    newBitstring += '1';
+                } else {
+                    newBitstring += '0';
+                }
+            } else {
+                newBitstring += bitstring[i];
+            }
+        }
+        return newBitstring;
+    }
+
+    function pad(string: string) {
+        return string.padStart(hammingCode.length, '0');
+    }
+
+    let runningXor = pad('');
+    for (let i = 0; i < hammingCode.length; i++) {
+        if (hammingCode[i] == '1') {
+            runningXor = bitwiseXor(runningXor, pad(toBinary(i)));
+        }
+    }
+    const errorPosition = toDecimal(runningXor);
+    const correctedHammingCode = flipBit(hammingCode, errorPosition);
+
+    let strippedBinary = '';
+    for (let i = 1; i < correctedHammingCode.length; i++) {
+        const isPowerOfTwo: boolean = Math.log2(i) % 1 === 0;
+        if (!isPowerOfTwo) {
+            strippedBinary += correctedHammingCode[i];
+        }
+    }
+    const final = toDecimal(strippedBinary);
+
+    // throw new Error("test error");
+    return final;
+}
 
 export const hammingcodesIntegerToEncodedBinary: CCTSolver<CodingContractName.HammingCodesIntegerToEncodedBinary> = function (n) {
     function toBinary(n: number) {

@@ -114,10 +114,8 @@ async function startWorker(ns: NS, contract: SolverContract) {
     const worker = new Worker(url);
     contract.worker = worker;
     worker.onmessage = function (msg) {
-        console.log('Received solution message from worker');
         contract.solution = msg.data; // Removed a JSON.stringify() without knowing what it was doing, because it was putting quotes around my output string
         contract.solved = true;
-        console.log(msg);
     }
     worker.onerror = function (msg) {
         contract.error = msg.message;
