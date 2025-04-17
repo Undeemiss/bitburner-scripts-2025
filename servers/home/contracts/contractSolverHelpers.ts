@@ -548,13 +548,13 @@ export const hammingcodesIntegerToEncodedBinary: CCTSolver<CodingContractName.Ha
     // Make space in the string for the encoding bits.
     const normalBinary = toBinary(n);
     let paddedBinary = `0${normalBinary}`;
-    for (let i = 1; i < normalBinary.length * 2; i *= 2) {
+    for (let i = 1; i <= normalBinary.length; i *= 2) {
         // Insert a 0 at location i, shifting everything after to a higher index.
         paddedBinary = paddedBinary.slice(0, i) + '0' + paddedBinary.slice(i);
     }
 
     // Main parity bits.
-    for (let i = 1; i < normalBinary.length * 2; i *= 2) {
+    for (let i = 1; i <= paddedBinary.length; i *= 2) {
         let parityGroup = 0;
         for (let j = 0; j < paddedBinary.length; j++) {
             // Only take values from the parity group
@@ -816,69 +816,72 @@ export const shortestPathInAGrid: CCTSolver<CodingContractName.ShortestPathInAGr
 }
 
 export const spiralizeMatrix: CCTSolver<CodingContractName.SpiralizeMatrix> = function (matrix) {
-    //If the matrix given is empty (base case)
-    if (!matrix?.length || !matrix[0]?.length) {
-        return [];
-    }
-
-    //Top part of the matrix
-    var top = matrix[0];
-    // ns.tprint("top = " + top);
-
-
-    //Right hand side of the matrix
-    var right = [];
-    //The x-coordinate of the right side
-    var x = matrix[0].length - 1;
-    //Iterate forwards through rows after the first
-    for (var i = 1; i < matrix.length; i++) {
-        //Add the rightmost element of the ith row to right
-        right.push(matrix[i][x]);
-    }
-    // ns.tprint("right = " + right);
-
-    //Bottom part of the matrix
-    var bottom = [];
-    //Prevent double-counting if there is only 1 row
-    if (matrix.length > 1) {
-        //The y-coordinate of the bottom
-        var y = matrix.length - 1;
-        //Iterate backwards through columns before the last
-        for (var i = matrix[0].length - 2; i >= 0; i--) {
-            //Add the bottom element of the ith column to bottom
-            bottom.push(matrix[y][i]);
+    function internalSpiralizeMatrix(matrix: number[][]) {
+        //If the matrix given is empty (base case)
+        if (!matrix?.length || !matrix[0]?.length) {
+            return [];
         }
-    }
-    // ns.tprint("bottom = " + bottom);
 
-    //Left hand side of the matrix
-    var left = [];
-    //Prevent double-counting if there is only 1 column
-    if (matrix[0].length > 1) {
-        //Iterate backwards through rows after the last and before the first
-        for (var i = matrix.length - 2; i > 0; i--) {
-            //Add the leftmost element of the ith row to right
-            left.push(matrix[i][0]);
+        //Top part of the matrix
+        var top = matrix[0];
+        // ns.tprint("top = " + top);
+
+
+        //Right hand side of the matrix
+        var right = [];
+        //The x-coordinate of the right side
+        var x = matrix[0].length - 1;
+        //Iterate forwards through rows after the first
+        for (var i = 1; i < matrix.length; i++) {
+            //Add the rightmost element of the ith row to right
+            right.push(matrix[i][x]);
         }
-        // ns.tprint("left = " + left);
-    }
+        // ns.tprint("right = " + right);
 
-    var minimatrix = [];
-    //Iterate through rows except the first and last
-    for (var i = 1; i < matrix.length - 1; i++) {
-
-        var row = [];
-        //Iterate through columns except the first and last
-        for (var j = 1; j < matrix[0].length - 1; j++) {
-            //Add the item to row
-            row.push(matrix[i][j]);
+        //Bottom part of the matrix
+        var bottom = [];
+        //Prevent double-counting if there is only 1 row
+        if (matrix.length > 1) {
+            //The y-coordinate of the bottom
+            var y = matrix.length - 1;
+            //Iterate backwards through columns before the last
+            for (var i = matrix[0].length - 2; i >= 0; i--) {
+                //Add the bottom element of the ith column to bottom
+                bottom.push(matrix[y][i]);
+            }
         }
-        //Add the row to minimatrix
-        minimatrix.push(row);
-    }
+        // ns.tprint("bottom = " + bottom);
 
-    //Return the answer, recursively handling the insides
-    return [].concat.apply([], [top, right, bottom, left, spiralizeMatrix(minimatrix)]);
+        //Left hand side of the matrix
+        var left = [];
+        //Prevent double-counting if there is only 1 column
+        if (matrix[0].length > 1) {
+            //Iterate backwards through rows after the last and before the first
+            for (var i = matrix.length - 2; i > 0; i--) {
+                //Add the leftmost element of the ith row to right
+                left.push(matrix[i][0]);
+            }
+            // ns.tprint("left = " + left);
+        }
+
+        var minimatrix = [];
+        //Iterate through rows except the first and last
+        for (var i = 1; i < matrix.length - 1; i++) {
+
+            var row = [];
+            //Iterate through columns except the first and last
+            for (var j = 1; j < matrix[0].length - 1; j++) {
+                //Add the item to row
+                row.push(matrix[i][j]);
+            }
+            //Add the row to minimatrix
+            minimatrix.push(row);
+        }
+
+        //Return the answer, recursively handling the insides
+        return [].concat.apply([], [top, right, bottom, left, internalSpiralizeMatrix(minimatrix)]);
+    }
+    return internalSpiralizeMatrix(matrix);
 }
 
 export const subarrayWithMaximumSum: CCTSolver<CodingContractName.SubarrayWithMaximumSum> = function (input) {
@@ -906,6 +909,27 @@ export const subarrayWithMaximumSum: CCTSolver<CodingContractName.SubarrayWithMa
         }
     }
     return max;
+}
+
+// Copied from https://stackoverflow.com/a/53684036 because I don't feel like implementing newton iterations. I've done them on my calculator before.
+export const squareRoot: CCTSolver<CodingContractName.SquareRoot> = function (value) {
+    if (value < 0n) {
+        throw 'square root of negative numbers is not supported'
+    }
+
+    if (value < 2n) {
+        return value;
+    }
+
+    function newtonIteration(n, x0) {
+        const x1 = ((n / x0) + x0) >> 1n;
+        if (x0 === x1 || x0 === (x1 - 1n)) {
+            return x0;
+        }
+        return newtonIteration(n, x1);
+    }
+
+    return newtonIteration(value, 1n);
 }
 
 export const totalWaysToSum: CCTSolver<CodingContractName.TotalWaysToSum> = function (n) {
