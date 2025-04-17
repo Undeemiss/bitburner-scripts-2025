@@ -911,25 +911,38 @@ export const subarrayWithMaximumSum: CCTSolver<CodingContractName.SubarrayWithMa
     return max;
 }
 
-// Copied from https://stackoverflow.com/a/53684036 because I don't feel like implementing newton iterations. I've done them on my calculator before.
-export const squareRoot: CCTSolver<CodingContractName.SquareRoot> = function (value) {
-    if (value < 0n) {
-        throw 'square root of negative numbers is not supported'
+export const squareRoot: CCTSolver<CodingContractName.SquareRoot> = function (input) {
+
+    // Note to self: (x >> 1n) is a bit-shift that returns floor(x/2).
+
+    // Input validation. Probably unnecessary for a contract solver, but you never know.
+    if (input < 0n) {
+        throw new Error("square root of negative numbers is not supported");
+    }
+    if (input < 2n) {
+        return input;
     }
 
-    if (value < 2n) {
-        return value;
+    // Set our initial guess to half the squared number. This should never be too much.
+    let x0 = input >> 1n;
+    // Newton's Method: x_{n+1} = x_n - (f(x_n) / f'(x_n)) = x_n - ((x^2_n - a) / 2 * x_n) = (x_n + (a / x_n)) / 2
+    let x1 = (x0 + input / x0) >> 1n;
+
+    // Repeat until convergence
+    while (x1 < x0) {
+        x0 = x1;
+        x1 = (x0 + input / x0) >> 1n;
     }
 
-    function newtonIteration(n, x0) {
-        const x1 = ((n / x0) + x0) >> 1n;
-        if (x0 === x1 || x0 === (x1 - 1n)) {
-            return x0;
-        }
-        return newtonIteration(n, x1);
-    }
+    // Ensure the returned value hasn't overshot by 1 due to truncation toward 0 sometimes being floor and sometimes being ceil.
+    const r = x0 * x0 > input ? x0 - 1n : x0;
 
-    return newtonIteration(value, 1n);
+    // Determine if the output should be rounded up by comparing the squared values to the original.
+    const lowDiff = input - r * r;
+    const highDiff = (r + 1n) * (r + 1n) - input;
+    const rounded = lowDiff < highDiff ? r : r + 1n;
+
+    return rounded;
 }
 
 export const totalWaysToSum: CCTSolver<CodingContractName.TotalWaysToSum> = function (n) {
