@@ -131,5 +131,5 @@ const getRandomMove = (board: string[], validMoves: boolean[][]) => {
 };
 
 export function autocomplete(data: AutocompleteData) {
-    return [...[5, 7, 9, 13], ...['Netburners', 'Slum Snakes', 'The Black Hand', 'Tetrads', 'Daedalus', 'Illuminati', '????????????'], '--tail'];
+    return [...[5, 7, 9, 13], ...['Netburners', '\"Slum Snakes\"', '\"The Black Hand\"', 'Tetrads', 'Daedalus', 'Illuminati', '????????????'], '--tail'];
 }
