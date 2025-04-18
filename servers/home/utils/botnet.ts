@@ -1,4 +1,5 @@
 import { ScriptArg } from "@/NetscriptDefinitions";
+const weakenScriptFilepath = 'batching/weaken.js';
 
 // Calculate how many threads of a given ram cost can be run on a botnet with available RAM
 export function getMaxThreads(ns: NS, botnet: Set<string>, ramCost: number) {
@@ -51,4 +52,63 @@ export function execOnBotnet(ns: NS, botnet: Set<string>, filepath: string, thre
         }
     }
     return remainingThreads;
+}
+
+
+// Execute a mass weaken() command.
+export function weakenOnBotnet(ns: NS, botnet: Set<string>, difficultyOffset: number, targetHostname: string) {
+    // export function execOnBotnet(ns: NS, botnet: Set<string>, weakenScriptFilepath: string, threads: number, args: ScriptArg[], temporary: boolean = true) {
+    // Short-circuit and/or error on nonsense operations
+    if (difficultyOffset == 0) {
+        return;
+    } else if (difficultyOffset < 0) {
+        throw RangeError(`weakenOnBotnet cannot fulfill a negative difficultyOffset (${difficultyOffset}).`);
+    }
+
+    // Iterate through the server list, spreading the thread load.
+    // TODO: Prioritize low-ram servers
+    for (const hostname of botnet) {
+        const availableThreads = getFreeRam(ns, hostname, 1.75);
+        if (availableThreads > 0) {
+            // Check how many threads we actually want, accounting for CPU cores
+            const weakenEffect = ns.weakenAnalyze(1, ns.getServer(hostname).cpuCores);
+            const requestedThreads = Math.ceil(difficultyOffset / weakenEffect)
+            const actualThreads = Math.min(availableThreads, requestedThreads);
+
+            // Run the weaken script
+            ns.scp(weakenScriptFilepath, hostname, 'home');
+            const returnValue = ns.exec(weakenScriptFilepath, hostname, { threads: actualThreads, temporary: true }, targetHostname);
+            if (returnValue == 0) {
+                throw new Error(`Failed to execute weaken on ${targetHostname} from ${hostname}.`);
+            }
+
+            // Return if the difficulty has been fully offset
+            difficultyOffset -= weakenEffect * actualThreads;
+            if (difficultyOffset <= 0) {
+                return;
+            }
+        }
+    }
+
+    // If we get here, all servers have failed. Throw an error.
+    throw new Error(`Failed to execute weakens of ${difficultyOffset} security on ${targetHostname}.`);
+}
+
+// Helper function for transitioning systems expecting to provide a number of threads. May overshoot slightly.
+export function weakenOnBotnetByThreads(ns: NS, botnet: Set<string>, weakenThreads: number, targetHostname: string) {
+    const difficultyOffset = weakenThreads * ns.weakenAnalyze(1);
+    return weakenOnBotnet(ns, botnet, difficultyOffset, targetHostname);
+}
+
+function getFreeRam(ns: NS, hostname: string, threadCost?: number) {
+    const server = ns.getServer(hostname);
+    if (!server.hasAdminRights) {
+        return 0;
+    }
+    const freeRam = server.maxRam - server.ramUsed;
+    if (threadCost === undefined) {
+        return freeRam;
+    } else {
+        return Math.floor(freeRam / threadCost);
+    }
 }

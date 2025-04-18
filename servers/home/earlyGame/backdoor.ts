@@ -11,12 +11,15 @@ export async function main(ns: NS) {
         await backdoor(ns, hostname);
     }
 
-    ns.tprint('Priority Hosts Done');
-    ns.print('Priority Hosts Done');
+    // Only backdoor all servers on request
+    if (ns.args[0]) {
+        ns.tprint('Priority Hosts Done');
+        ns.print('Priority Hosts Done');
 
-    const hosts = getHosts(ns);
-    for (const hostname of hosts) {
-        await backdoor(ns, hostname);
+        const hosts = getHosts(ns);
+        for (const hostname of hosts) {
+            await backdoor(ns, hostname);
+        }
     }
 
     ns.singularity.connect('home');
