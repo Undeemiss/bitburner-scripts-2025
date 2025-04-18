@@ -10,6 +10,9 @@ export async function main(ns: NS) {
 
     // Initialize parameters for the script
     let botnet = getHosts(ns);
+    if (!ns.args[0]) {
+        botnet.delete('home');
+    }
     let target = ns.getServer('joesguns');
 
     // Start Batching
@@ -46,9 +49,11 @@ async function expGrow(ns: NS, targetHostname: string, botnet: Set<string>) {
             if (failed != 0) {
                 throw Error(`Failed to allocate ${failed} requested grow/weaken threads.`);
             }
+            await ns.sleep(weakenTime);
+        } else {
+            ns.print(`No RAM to grind EXP! Sleeping...\n${ns.tFormat(wakeupTimer)}`);
+            await ns.sleep(wakeupTimer);
         }
-        ns.print(`No RAM to grind EXP! Sleeping...\n${ns.tFormat(wakeupTimer)}`);
-        await ns.sleep(wakeupTimer);
     }
 }
 

@@ -53,6 +53,7 @@ async function playOneGame(ns: NS, opponent?: GoOpponent) {
         await ns.go.opponentNextTurn();
 
         // Print the board state
+        ns.clearLog();
         ns.print(`Opponent: ${opponent}\n${prettifyBoard(board)}`);
 
         // Keep looping as long as the opponent is playing moves

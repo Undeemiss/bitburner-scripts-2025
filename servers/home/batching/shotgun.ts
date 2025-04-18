@@ -1,7 +1,7 @@
 import { AutocompleteData } from "@/NetscriptDefinitions";
 import { getMaxThreads, execOnBotnet } from "../utils/botnet";
 
-const sleepBuffer = 1000;
+const sleepBuffer = 200;
 const wakeupTimer = 10000;
 
 /** @param {NS} ns */
@@ -39,14 +39,14 @@ async function batch(ns: NS, targetHostname: string, botnet: Set<string>) {
         const threadHackPercent = ns.formulas.hacking.hackPercent(projectedTarget, player)
         const absMaxHackThreads = Math.ceil(1 / threadHackPercent);
 
-        const hackThreads = Math.ceil(absMaxHackThreads * 0.1);
+        const hackThreads = Math.ceil(absMaxHackThreads * 0.0001);
         projectedTarget.moneyAvailable = Math.max(0, target.moneyMax * (1 - (hackThreads * threadHackPercent)));
         const growThreads = ns.formulas.hacking.growThreads(projectedTarget, player, target.moneyMax);
         const hackWeakens = Math.ceil(hackThreads * weakensPerHack);
         const growWeakens = Math.ceil(growThreads * weakensPerGrow);
         const threadsPerBatch = hackThreads + hackWeakens + growThreads + growWeakens;
 
-        const batches = Math.floor(threadsAvailable / threadsPerBatch);
+        const batches = Math.min(Math.floor(threadsAvailable / threadsPerBatch), 100000);
 
         const weakenTime = ns.formulas.hacking.weakenTime(target, player);
         const hackDeltaTime = weakenTime - ns.formulas.hacking.hackTime(target, player);
@@ -103,7 +103,7 @@ async function initialWeaken(ns: NS, targetHostname: string, botnet: Set<string>
                 await ns.sleep(wakeupTimer);
             } else { // Wait until the operation completes if some, but not all, of the threads were fulfilled
                 const sleepTime = sleepBuffer + ns.formulas.hacking.weakenTime(target, player);
-                ns.print(`Waiting for more initial weaken (${returned}remaining out of ${weakenThreads} total)...\n${ns.tFormat(sleepTime)}`);
+                ns.print(`Waiting for more initial weaken (${returned} remaining out of ${weakenThreads} total)...\n${ns.tFormat(sleepTime)}`);
                 await ns.sleep(sleepTime);
             }
         }
