@@ -1,4 +1,5 @@
 import { Server } from "@/NetscriptDefinitions";
+import { execOnBotnet, weakenOnBotnet } from "../utils/botnet";
 
 const absMaxBatches = 100000;
 
@@ -28,3 +29,22 @@ function getBatchThreads(ns: NS, targetStealRatio: number, targetHostname: strin
     return [totalThreads, stealRatio, [hackThreads, hackWeakens, growThreads, growWeakens]];
 }
 
+
+function sendBatches(ns: NS, targetHostname: string, botnet: Set<string>, hackThreads: number, batches: number) {
+    let failedHacks = 0;
+    let failedGrows = 0;
+
+    // TODO: Define required parameters for batching below
+
+    for (let i = 0; i < batches; i++) {
+        // TODO: These are called potentially hundreds of thousands of times consecutively, and have a lot of room for optimization.
+        
+        // failedHacks += execOnBotnet(ns, botnet, 'batching/hack.js', hackThreads, [targetHostname, hackDeltaTime], false, true);
+        // weakenOnBotnet(ns, botnet, hackDifficultyOffset, targetHostname);
+        // failedGrows += execOnBotnet(ns, botnet, 'batching/grow.js', growThreads, [targetHostname, growDeltaTime], false, true);
+        // weakenOnBotnet(ns, botnet, growDifficultyOffset, targetHostname);
+    }
+    if (failedHacks + failedGrows > 0) {
+        throw Error(`Failed to allocate ${failedHacks} hack threads and ${failedGrows} grow threads.`);
+    }
+}

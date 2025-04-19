@@ -1,4 +1,4 @@
-import { ScriptArg } from "@/NetscriptDefinitions";
+import { ScriptArg, Server } from "@/NetscriptDefinitions";
 const weakenScriptFilepath = 'batching/weaken.js';
 
 // Calculate how many threads of a given ram cost can be run on a botnet with available RAM
@@ -13,8 +13,28 @@ export function getMaxThreads(ns: NS, botnet: Set<string>, ramCost: number) {
     return maxThreads;
 }
 
+// Returns a list of server hostnames with at least minRam available, smallest first.
+export function getSortedServers(ns: NS, botnet: Set<string>, minRam: number) {
+    type FreeRamServer = Server & { freeRam?: number };
+    const serverList: FreeRamServer[] = [];
+
+    // Check each server in the botnet
+    for (const hostname of botnet) {
+        // If the server has sufficient RAM, add it to our list.
+        const server: FreeRamServer = ns.getServer(hostname);
+        server.freeRam = getFreeRam(ns, server);
+        if (server.freeRam >= minRam) {
+            serverList.push(server);
+        }
+    }
+
+    // Sort the server list
+    serverList.sort((a, b) => a.freeRam - b.freeRam);
+    return serverList.map(x => x.hostname);
+}
+
 // Distribute a large number of threads across a botnet. Returns the number of threads that could not be filled.
-export function execOnBotnet(ns: NS, botnet: Set<string>, filepath: string, threads: number, args: ScriptArg[], temporary: boolean = true) {
+export function execOnBotnet(ns: NS, botnet: Set<string>, filepath: string, threads: number, args: ScriptArg[], splittable: boolean = true, temporary: boolean = true) {
     // Short-circuit and/or error on nonsense operations
     if (threads == 0) {
         return 0;
@@ -22,12 +42,14 @@ export function execOnBotnet(ns: NS, botnet: Set<string>, filepath: string, thre
         throw RangeError(`execOnBotnet cannot fulfill ${threads} threads.`);
     }
 
-    // Initialize necessary values
+    // Initialize ram-cost related values
     const ramCost = ns.getScriptRam(filepath, 'home');
     let remainingThreads = threads;
+    const neededRam = splittable ? ramCost : ramCost * threads;
 
     // Iterate through the server list, spreading the thread load.
-    for (const hostname of botnet) {
+    const sortedBotnet = getSortedServers(ns, botnet, neededRam);
+    for (const hostname of sortedBotnet) {
         // Check how many threads the server can run
         const server = ns.getServer(hostname);
         if (!(server.hasAdminRights)) {
@@ -48,6 +70,8 @@ export function execOnBotnet(ns: NS, botnet: Set<string>, filepath: string, thre
             remainingThreads -= actualThreads;
             if (remainingThreads <= 0) {
                 break;
+            } else if (!splittable) {
+                throw new Error('A non-splitting execOnBotnet call was split. This is a bug in execOnBotnet.');
             }
         }
     }
@@ -65,10 +89,11 @@ export function weakenOnBotnet(ns: NS, botnet: Set<string>, difficultyOffset: nu
         throw RangeError(`weakenOnBotnet cannot fulfill a negative difficultyOffset (${difficultyOffset}).`);
     }
 
-    // Iterate through the server list, spreading the thread load.
-    // TODO: Prioritize low-ram servers
-    for (const hostname of botnet) {
-        const availableThreads = getFreeRam(ns, hostname, 1.75);
+    // Iterate through the server list, spreading the thread load. Prioritizes filling out low-RAM servers.
+    const sortedBotnet = getSortedServers(ns, botnet, 1.75);
+    for (const hostname of sortedBotnet) {
+        const server = ns.getServer(hostname);
+        const availableThreads = getFreeRam(ns, server, 1.75);
         if (availableThreads > 0) {
             // Check how many threads we actually want, accounting for CPU cores
             const weakenEffect = ns.weakenAnalyze(1, ns.getServer(hostname).cpuCores);
@@ -100,8 +125,7 @@ export function weakenOnBotnetByThreads(ns: NS, botnet: Set<string>, weakenThrea
     return weakenOnBotnet(ns, botnet, difficultyOffset, targetHostname);
 }
 
-function getFreeRam(ns: NS, hostname: string, threadCost?: number) {
-    const server = ns.getServer(hostname);
+function getFreeRam(ns: NS, server: Server, threadCost?: number) {
     if (!server.hasAdminRights) {
         return 0;
     }
