@@ -1,5 +1,7 @@
 import { getHosts } from "../utils/getHosts";
 import * as solvers from "./contractSolverHelpers";
+import { printRewards } from "./rewardParser";
+
 type SolverContract = {
     host: string,
     name: string,
@@ -73,7 +75,8 @@ export async function main(ns: NS) {
         }
     }
 
-    ns.print(`Done. Rewards: ${rewards.join(", ")}`);
+    ns.print(`Done. Rewards:`);
+    printRewards(ns, rewards);
 }
 
 //Uses a regex to convert a string to camelCase
