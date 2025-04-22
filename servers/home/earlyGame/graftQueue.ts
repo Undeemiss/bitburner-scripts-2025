@@ -3,12 +3,16 @@ import { AutocompleteData } from "@/NetscriptDefinitions";
 /** @param {NS} ns */
 export async function main(ns: NS) {
     let augs = <string[]>ns.args;
+    const allGraftable = ns.grafting.getGraftableAugmentations();
+    augs = augs.filter((value, index, array) => allGraftable.includes(value));
+
     while (augs.length > 0) {
+        ns.print(augs);
         // Graft the first possible aug in the list
         for (let i = 0; i < augs.length; i++) {
             const returned = await safeGraft(ns, augs[i]);
             if (returned) {
-                augs = augs.splice(i, 1);
+                augs.splice(i, 1);
                 break;
             }
         }
@@ -17,9 +21,9 @@ export async function main(ns: NS) {
 }
 
 async function safeGraft(ns: NS, augName: string) {
-    ns.singularity.travelToCity("New Tokyo");
     await ns.grafting.waitForOngoingGrafting();
-    return ns.grafting.graftAugmentation(augName, true);
+    ns.singularity.travelToCity("New Tokyo");
+    return ns.grafting.graftAugmentation(augName, false);
 }
 
 
