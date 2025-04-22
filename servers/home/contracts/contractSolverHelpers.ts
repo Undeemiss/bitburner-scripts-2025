@@ -535,22 +535,27 @@ export const hammingcodesEncodedBinaryToInteger: CCTSolver<CodingContractName.Ha
 }
 
 export const hammingcodesIntegerToEncodedBinary: CCTSolver<CodingContractName.HammingCodesIntegerToEncodedBinary> = function (n) {
-    function toBinary(n: number) {
+    function toBinary(n: number): (0 | 1)[] {
         let remaining = n;
-        let binary = '';
+        const binary: (0 | 1)[] = [];
         while (remaining > 0) {
-            binary = `${remaining % 2}${binary}`;
+            binary.splice(0, 0, (<0 | 1>(remaining % 2)));
             remaining = Math.floor(remaining / 2);
         }
         return binary;
     }
 
-    // Make space in the string for the encoding bits.
+    function isParityBit(i: number) {
+        return i == 0 || (Math.log2(i) % 1 === 0)
+    }
+
+    // Make space in the array for the encoding bits.
     const normalBinary = toBinary(n);
-    let paddedBinary = `0${normalBinary}`;
-    for (let i = 1; i <= normalBinary.length; i *= 2) {
+    const paddedBinary = normalBinary.slice();
+    paddedBinary.splice(0, 0, 0); // Insert the padding at position 0, which can't be done in the loop
+    for (let i = 1; i <= paddedBinary.length; i *= 2) {
         // Insert a 0 at location i, shifting everything after to a higher index.
-        paddedBinary = paddedBinary.slice(0, i) + '0' + paddedBinary.slice(i);
+        paddedBinary.splice(i, 0, 0);
     }
 
     // Main parity bits.
@@ -559,11 +564,11 @@ export const hammingcodesIntegerToEncodedBinary: CCTSolver<CodingContractName.Ha
         for (let j = 0; j < paddedBinary.length; j++) {
             // Only take values from the parity group
             if ((j % (i * 2)) >= i) {
-                parityGroup = parityGroup + Number(paddedBinary[j]);
+                parityGroup = parityGroup + paddedBinary[j];
             }
         }
         // Replace the value at location i with the parity bit.
-        paddedBinary = paddedBinary.slice(0, i) + (parityGroup % 2) + paddedBinary.slice(i + 1);
+        paddedBinary[i] = <0 | 1>(parityGroup % 2);
     }
 
     // Index 0 parity bit.
@@ -571,7 +576,16 @@ export const hammingcodesIntegerToEncodedBinary: CCTSolver<CodingContractName.Ha
     for (let i = 1; i < paddedBinary.length; i++) {
         parityGroup = parityGroup + Number(paddedBinary[i]);
     }
-    const hammingCode = `${parityGroup % 2}${paddedBinary.slice(1)}`;
+    paddedBinary[0] = <0 | 1>(parityGroup % 2);
+
+    // Error checking
+    const dataBits = paddedBinary.filter((value, index, array) => !isParityBit(index));
+    if (dataBits.join('') != normalBinary.join('')) {
+        throw new Error(`Data bits (${dataBits.join('')}) do not match normal binary (${normalBinary.join('')}). Would have submitted ${paddedBinary.join('')}.`);
+    }
+
+    // Convert to string and return
+    const hammingCode = paddedBinary.join('');
     return hammingCode;
 }
 
