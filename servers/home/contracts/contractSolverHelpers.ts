@@ -553,13 +553,13 @@ export const hammingcodesIntegerToEncodedBinary: CCTSolver<CodingContractName.Ha
     const normalBinary = toBinary(n);
     const paddedBinary = normalBinary.slice();
     paddedBinary.splice(0, 0, 0); // Insert the padding at position 0, which can't be done in the loop
-    for (let i = 1; i <= paddedBinary.length; i *= 2) {
+    for (let i = 1; i < paddedBinary.length; i *= 2) {
         // Insert a 0 at location i, shifting everything after to a higher index.
         paddedBinary.splice(i, 0, 0);
     }
 
     // Main parity bits.
-    for (let i = 1; i <= paddedBinary.length; i *= 2) {
+    for (let i = 1; i < paddedBinary.length; i *= 2) {
         let parityGroup = 0;
         for (let j = 0; j < paddedBinary.length; j++) {
             // Only take values from the parity group
