@@ -17,8 +17,8 @@ export function parseRewards(rewardsList: string[]): RewardSummary {
     };
 
     const moneyRegex = /\$([\d.]+)([kmb])/i;
-    const singleFactionRegex = /Gained (\d+) (?:faction )?reputation for ([\w\s]+)/;
-    const multiFactionRegex = /Gained (\d+) reputation for each of the following factions: ([\w\s,]+)/;
+    const singleFactionRegex = /Gained (\d+) (?:faction )?reputation for ([\w\s-]+)/;
+    const multiFactionRegex = /Gained (\d+) reputation for each of the following factions: ([\w\s,-]+)/;
 
     const multiplierMap: Record<string, number> = {
         k: 1e3,
