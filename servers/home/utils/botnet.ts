@@ -116,7 +116,9 @@ export function weakenOnBotnet(ns: NS, botnet: Set<string>, difficultyOffset: nu
     }
 
     // If we get here, all servers have failed. Throw an error.
-    throw new Error(`Failed to execute weakens of ${difficultyOffset} security on ${targetHostname}.`);
+    const err: any = new Error('Insufficient RAM on botnet.');
+    err.difficultyOffset = difficultyOffset;
+    throw err;
 }
 
 // Helper function for transitioning systems expecting to provide a number of threads. May overshoot slightly.
