@@ -6,6 +6,7 @@ export async function main(ns: NS) {
     ns.disableLog('ALL');
     let course: ClassString;
     switch (ns.args[0]) {
+        case undefined: course = 'Algorithms'; break;
         case 'hacking': course = 'Algorithms'; break;
         case 'charisma': course = 'Leadership'; break;
         default: course = <ClassString>ns.args[0];
