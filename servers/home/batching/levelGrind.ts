@@ -2,7 +2,7 @@ import { AutocompleteData, Player, Server } from "@/NetscriptDefinitions";
 import { getMaxThreads, execOnBotnet } from "../utils/botnet";
 import { getHosts } from "../utils/getHosts";
 
-const wakeupTimer = 100;
+const wakeupTimer = 5;
 
 /** @param {NS} ns */
 export async function main(ns: NS) {
