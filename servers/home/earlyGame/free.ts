@@ -2,7 +2,7 @@ import { getHosts } from "../utils/getHosts";
 
 /** @param {NS} ns */
 export async function main(ns: NS) {
-    const knownHosts = getHosts(ns);
+    const knownHosts = getHosts(ns, true);
 
     let totalRam = 0;
     let controlledRam = 0;

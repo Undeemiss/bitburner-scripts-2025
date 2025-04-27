@@ -3,7 +3,7 @@ import { AutocompleteData } from "@/NetscriptDefinitions";
 
 /** @param {NS} ns */
 export async function main(ns: NS) {
-    const hosts = getHosts(ns);
+    const hosts = getHosts(ns, true);
     const toDistribute = <string>ns.args[1];
     let requestedAmt = <number>ns.args[0];
     if (requestedAmt == 0) {

@@ -9,10 +9,8 @@ export async function main(ns: NS) {
     ns.disableLog('ALL');
 
     // Initialize parameters for the script
-    let botnet = getHosts(ns);
-    if (!ns.args[0]) {
-        botnet.delete('home');
-    }
+    const includeHome = ns.args[0] ? true : false;
+    let botnet = getHosts(ns, includeHome);
     let target = ns.getServer('joesguns');
 
     // Start Batching

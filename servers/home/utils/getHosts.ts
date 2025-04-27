@@ -8,8 +8,8 @@ export async function main(ns: NS) {
     }
 }
 
-export function getHosts(ns: NS) {
-    const knownHosts = new Set<string>();
+export function getHosts(ns: NS, includeHome: boolean = false, includeHacknet: boolean = false) {
+    let knownHosts = new Set<string>();
     knownHosts.add("home");
     const toSearch = ["home"];
 
@@ -17,11 +17,20 @@ export function getHosts(ns: NS) {
         const hostname = toSearch.pop();
         const scanResults = ns.scan(hostname);
         for (const scannedHost of scanResults) {
+            // Hacknet server exclusion
+            if (!includeHacknet && scannedHost.startsWith('hacknet-server-')) {
+                continue;
+            }
+
             if (!knownHosts.has(scannedHost)) {
                 toSearch.push(scannedHost);
             }
             knownHosts.add(scannedHost);
         }
+    }
+
+    if (!includeHome) {
+        knownHosts.delete('home');
     }
 
     return knownHosts;
