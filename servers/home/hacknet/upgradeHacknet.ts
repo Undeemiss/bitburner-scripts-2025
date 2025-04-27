@@ -18,8 +18,9 @@ export async function main(ns: NS) {
     let idealServer = { level: 1, maxRam: 1, cores: 1 };
     let idealServerAmount = ns.hacknet.numNodes();
 
-    // TODO: Min ROI calculation
-    let minRoi = 0;
+    // Min ROI calculation
+    const paybackHours = ns.args[0] ? <number>ns.args[0] : Infinity;
+    const minRoi = paybackHoursToRoi(paybackHours);
 
     while (true) {
         let attemptedPurchases = 0;

@@ -68,7 +68,7 @@ export async function main(ns: NS) {
         }
 
         if (contracts?.length) {
-            ns.print(`Pending contracts: ${contracts.map((c) => `${c.name}@${c.host}-${c.type}`).join(", ")}`);
+            // ns.print(`Pending contracts: ${contracts.map((c) => `${c.name}@${c.host}-${c.type}`).join(", ")}`);
             await ns.sleep(1000);
         } else {
             break;
