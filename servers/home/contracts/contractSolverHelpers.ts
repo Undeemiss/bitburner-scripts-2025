@@ -286,7 +286,7 @@ export const compressionIiLzDecompression: CCTSolver<CodingContractName.Compress
     return uncompressedData;
 }
 
-// Taken directly from the game src
+// TODO: At least try to understand this code. Taken directly from the game src. 
 export const compressionIiiLzCompression: CCTSolver<CodingContractName.CompressionIIILZCompression> = function (plain) {
 
     // for state[i][j]:
@@ -1079,30 +1079,37 @@ export const squareRoot: CCTSolver<CodingContractName.SquareRoot> = function (in
     return rounded;
 }
 
+// This is actually a *more intensive* case of totalWaysToSumIi, with smaller values of n.
 export const totalWaysToSum: CCTSolver<CodingContractName.TotalWaysToSum> = function (n) {
-    //Initialize list with 0s
-    var list = [];
+    const allowedValues = [];
+    for (let i = 1; i < n; i++) {
+        allowedValues.push(i);
+    }
+    return totalWaysToSumIi([n, allowedValues]);
+}
+
+export const totalWaysToSumIi: CCTSolver<CodingContractName.TotalWaysToSumII> = function (data) {
+    const [n, allowedValues] = data;
+
+    //Initialize a list of computed ways to sum waysToSum[x] with 0s, excepting the base case of 1.
+    const waysToSum = [1];
     for (var i = 1; i <= n; i++) {
-        list[i] = 0;
+        waysToSum[i] = 0;
     }
 
-    // Base case
-    list[0] = 1;
+    //For each value we are allowed to add
+    for (const i of allowedValues) {
 
-    //For each item in the list except the first
-    for (var i = 1; i < n; i++) {
-        //For every item in the list at or after i
-        for (var j = i; j <= n; j++) {
-            //Consider the ways to write j by taking (i) + (some way to write j-i without values > i)
-            list[j] += list[j - i];
+        // We can obtain a new way of adding to j by taking an existing way to add to j-i and adding i.
+        // If done in ascending order, this will give every possible way.
+        for (let j = i; j < waysToSum.length; j++) {
+            waysToSum[j] += waysToSum[j - i];
         }
     }
 
     //Return the final value
-    return list[n];
+    return waysToSum[n];
 }
-
-//TODO: totalWaysToSumIi
 
 
 export const uniquePathsInAGridI: CCTSolver<CodingContractName.UniquePathsInAGridI> = function (input) {
