@@ -35,7 +35,7 @@ export async function main(ns: NS) {
             };
             try {
                 await startWorker(ns, contract);
-                ns.print(`${contract.name}@${contract.host} - Starting`);
+                // ns.print(`${contract.name}@${contract.host} - Starting`);
                 contracts.push(contract);
             }
             catch (e) {

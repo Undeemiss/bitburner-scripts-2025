@@ -14,6 +14,7 @@ export async function main(ns: NS) {
     let botnet = getHosts(ns);
 
     await initialWeaken(ns, target.hostname, botnet);
+    // await initialGrow(ns, target.hostname, botnet);
     // TODO: Initial grow, batching loop
 }
 
@@ -43,6 +44,80 @@ async function initialWeaken(ns: NS, targetHostname: string, botnet: Set<string>
         await ns.sleep(1000);
     }
 }
+
+// async function initialGrow(ns: NS, targetHostname: string, botnet: Set<string>) {
+//     let target = ns.getServer(targetHostname);
+//     let player = ns.getPlayer()
+//     let difficultyOffset = target.hackDifficulty - target.minDifficulty;
+
+//     while (difficultyOffset > 0) {
+//         try {
+//             weakenOnBotnet(ns, botnet, difficultyOffset, targetHostname);
+//             difficultyOffset = 0; // If the above didn't error, we had enough RAM.
+//         }
+//         catch (e) { // Gracefully catch errors thrown due to insufficient RAM
+//             try {
+//                 if (!(e.message == 'Insufficient RAM on botnet.')) {
+//                     throw e;
+//                 }
+
+//                 // Update the remaining difficultyOffset
+//                 difficultyOffset = e.difficultyOffset;
+//             } catch (_) {
+//                 throw e;
+//             }
+//         }
+
+//         // TODO: Status updates
+//         await ns.sleep(1000);
+//     }
+// }
+
+// async function initialGrow(ns: NS, targetHostname: string, botnet: Set<string>) {
+//     // Initialize variables
+//     let target = ns.getServer(targetHostname);
+//     let player = ns.getPlayer();
+//     const weakenEffectiveness = ns.weakenAnalyze(1);
+//     const weakensPerGrow = 2 * balanceRatio(weakenEffectiveness);
+//     const efficiencyFactor = (1 / (1 + weakensPerGrow));
+
+//     // Grow until the server is completely full
+//     let growThreadsRemaining = ns.formulas.hacking.growThreads(target, player, target.moneyMax);
+//     const totalGrowThreads = growThreadsRemaining;
+//     while (growThreadsRemaining > 0) {
+//         // Ensure accurate data for formulas
+//         target = ns.getServer(targetHostname);
+//         player = ns.getPlayer();
+
+//         // Calculate how many grow/weaken threads to use with available RAM
+//         const availableThreads = getMaxThreads(ns, botnet, 1.75);
+//         const growThreads = Math.min(Math.floor(availableThreads * efficiencyFactor), growThreadsRemaining);
+//         const weakenThreads = Math.ceil(growThreads * weakensPerGrow);
+
+//         // If there is enough RAM to grow and weaken, proceed.
+//         if (weakenThreads > 0) {
+//             const weakenTime = ns.formulas.hacking.weakenTime(target, player);
+//             const growDeltaTime = weakenTime - ns.formulas.hacking.growTime(target, player);
+
+//             let failed = 0;
+//             failed += execOnBotnet(ns, botnet, 'batching/grow.js', growThreads, [targetHostname, growDeltaTime]);
+//             failed += execOnBotnet(ns, botnet, 'batching/weaken.js', weakenThreads, [targetHostname]);
+//             if (failed != 0) {
+//                 throw Error(`Failed to allocate ${failed} requested grow/weaken threads.`);
+//             }
+
+//             growThreadsRemaining -= growThreads;
+//             if (growThreadsRemaining > 0) { // Wait until the operation completes if some, but not all, of the threads were fulfilled
+//                 ns.print(`Waiting for more initial grow (${growThreadsRemaining} remaining out of ${totalGrowThreads} total)...\n${ns.tFormat(sleepBuffer + weakenTime)}`);
+//                 await ns.sleep(sleepBuffer + weakenTime);
+//             }
+
+//         } else { // Wait breifly if not enough RAM is available
+//             ns.print(`No RAM to Grow! Sleeping...\n${ns.tFormat(wakeupTimer)}`);
+//             await ns.sleep(wakeupTimer);
+//         }
+//     }
+// }
 
 function getIdealBatchSize(ns: NS, targetHostname: string, availableRam: number) {
     // Get an idealized version of the target server

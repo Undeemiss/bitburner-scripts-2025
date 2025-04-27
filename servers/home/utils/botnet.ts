@@ -138,3 +138,48 @@ function getFreeRam(ns: NS, server: Server, threadCost?: number) {
         return Math.floor(freeRam / threadCost);
     }
 }
+
+// // Execute a mass grow() command without raising security level.
+// export function initialGrowOnBotnet(ns: NS, botnet: Set<string>, targetHostname: string) {
+//     let server = ns.getServer(targetHostname);
+
+//     // Short-circuit and/or error on nonsense operations
+//     if (server.moneyAvailable >= server.moneyMax) {
+//         return;
+//     }
+
+//     const weakensPerGrow = 0.004 * ns.weakenAnalyze(1);
+//     const efficiencyFactor = (1 / (1 + weakensPerGrow));
+
+//     // Iterate through the server list, spreading the thread load. Prioritizes using high-RAM servers to minimize splitting.
+//     const sortedBotnet = getSortedServers(ns, botnet, 1.75).reverse();
+
+//     for (const hostname of sortedBotnet) {
+//         const server = ns.getServer(hostname);
+//         const availableThreads = getFreeRam(ns, server, 1.75);
+//         if (availableThreads > 0) {
+//             // Check how many threads we actually want, accounting for CPU cores
+//             const weakenEffect = ns.weakenAnalyze(1, ns.getServer(hostname).cpuCores);
+//             const requestedThreads = Math.ceil(difficultyOffset / weakenEffect)
+//             const actualThreads = Math.min(availableThreads, requestedThreads);
+
+//             // Run the weaken script
+//             ns.scp(weakenScriptFilepath, hostname, 'home');
+//             const returnValue = ns.exec(weakenScriptFilepath, hostname, { threads: actualThreads, temporary: true }, targetHostname);
+//             if (returnValue == 0) {
+//                 throw new Error(`Failed to execute weaken on ${targetHostname} from ${hostname}.`);
+//             }
+
+//             // Return if the difficulty has been fully offset
+//             difficultyOffset -= weakenEffect * actualThreads;
+//             if (difficultyOffset <= 0) {
+//                 return;
+//             }
+//         }
+//     }
+
+//     // If we get here, all servers have failed. Throw an error.
+//     const err: any = new Error('Insufficient RAM on botnet.');
+//     err.difficultyOffset = difficultyOffset;
+//     throw err;
+// }
