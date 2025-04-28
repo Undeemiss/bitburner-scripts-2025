@@ -16,7 +16,8 @@ export async function main(ns: NS) {
     ns.disableLog("ALL");
     ns.ui.openTail();
 
-    const hosts = getHosts(ns);
+    // I don't know if they can spawn on my servers, but it doesn't hurt to check
+    const hosts = getHosts(ns, true, true);
 
     const contracts: SolverContract[] = [];
     const rewards = [];
