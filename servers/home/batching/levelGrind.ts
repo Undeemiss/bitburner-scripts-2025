@@ -2,15 +2,17 @@ import { AutocompleteData, Player, Server } from "@/NetscriptDefinitions";
 import { getMaxThreads, execOnBotnet } from "../utils/botnet";
 import { getHosts } from "../utils/getHosts";
 
-const wakeupTimer = 5;
+const WAKEUP_TIMER = 1000;
+const WAKEUP_BUFFER = 5;
 
 /** @param {NS} ns */
 export async function main(ns: NS) {
     ns.disableLog('ALL');
 
     // Initialize parameters for the script
-    const includeHome = ns.args[0] ? true : false;
-    let botnet = getHosts(ns, includeHome);
+    const includeHome = ns.args.includes('home');
+    const includeHacknet = ns.args.includes('hacknet');
+    let botnet = getHosts(ns, includeHome, includeHacknet);
     let target = ns.getServer('joesguns');
 
     // Start Batching
@@ -47,14 +49,15 @@ async function expGrow(ns: NS, targetHostname: string, botnet: Set<string>) {
             if (failed != 0) {
                 throw Error(`Failed to allocate ${failed} requested grow/weaken threads.`);
             }
-            await ns.sleep(weakenTime);
+            ns.print(`Level Grinding... Sent ${growThreads + weakenThreads} threads.`);
+            await ns.sleep(Math.min(weakenTime + WAKEUP_BUFFER, WAKEUP_TIMER));
         } else {
-            ns.print(`No RAM to grind EXP! Sleeping...\n${ns.tFormat(wakeupTimer)}`);
-            await ns.sleep(wakeupTimer);
+            // ns.print(`Level Grinding... Waiting for RAM`);
+            await ns.sleep(WAKEUP_TIMER);
         }
     }
 }
 
 export function autocomplete(data: AutocompleteData) {
-    return ['--tail'];
+    return ['home', 'hacknet', '--tail'];
 }

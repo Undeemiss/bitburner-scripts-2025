@@ -1,7 +1,7 @@
 import { AutocompleteData } from "@/NetscriptDefinitions";
 import { getMaxThreads, execOnBotnet } from "../utils/botnet";
 
-const sleepBuffer = 200;
+const sleepBuffer = 1000;
 const wakeupTimer = 10000;
 
 /** @param {NS} ns */
