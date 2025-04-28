@@ -26,6 +26,6 @@ export async function main(ns: NS) {
 }
 
 export function autocomplete(data: AutocompleteData) {
-    let crimeValues: string[] = Object.keys(CrimeType);
+    const crimeValues: string[] = Object.keys(CrimeType);
     return [...crimeValues, '--tail'];
 }
